@@ -21,13 +21,15 @@ class MyApp extends StatelessWidget {
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key});
-  final _counter = 0;
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  final _memoList = ['title', 'title2', 'title3'];
+  var _titleController = TextEditingController();
+
   Future<void> InputDialog(BuildContext context) async {
     return showDialog(
         context: context,
@@ -36,6 +38,7 @@ class _MyHomePageState extends State<MyHomePage> {
             title: Text("タイトル"),
             content: TextField(
               decoration: InputDecoration(hintText: "ここに入力"),
+              controller: _titleController,
             ),
             actions: <Widget>[
               TextButton(
@@ -46,6 +49,9 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
               TextButton(
                 onPressed: () {
+                  setState(() {
+                    _memoList.add(_titleController.text);
+                  });
                   Navigator.pop(context);
                 },
                 child: Text("OK"),
@@ -62,20 +68,11 @@ class _MyHomePageState extends State<MyHomePage> {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Text("Home"),
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              'Hello',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-          ],
-        ),
-      ),
+      body: ListView.builder(
+          itemCount: _memoList.length,
+          itemBuilder: (context, index) {
+            return Text(_memoList[index]);
+          }),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           InputDialog(context);
