@@ -61,6 +61,17 @@ class _MyHomePageState extends State<MyHomePage> {
         });
   }
 
+  Widget _listTile(String title) {
+    return Column(
+      children: <Widget>[
+        ListTile(
+          title: Text(title),
+        ),
+        const Divider(),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -71,7 +82,7 @@ class _MyHomePageState extends State<MyHomePage> {
       body: ListView.builder(
           itemCount: _memoList.length,
           itemBuilder: (context, index) {
-            return Text(_memoList[index]);
+            return _listTile(_memoList[index]);
           }),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
