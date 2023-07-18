@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:todolist/memo.dart';
 
 void main() {
   runApp(const MyApp());
@@ -65,8 +66,16 @@ class _MyHomePageState extends State<MyHomePage> {
     return Column(
       children: <Widget>[
         ListTile(
-          title: Text(title),
-        ),
+            title: Text(title),
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) {
+                    return MemoPage(title: title);
+                  },
+                ),
+              );
+            }),
         const Divider(),
       ],
     );
