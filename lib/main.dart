@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:todolist/data.dart';
 import 'package:todolist/memo.dart';
 
+import 'dbHelper.dart';
+
 void main() {
-  runApp(const MyApp());
+  runApp(const ProviderScope(child: MyApp()));
 }
+
+final memoProvider = ((_) => '');
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -20,16 +26,20 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key});
+class MyHomePage extends ConsumerStatefulWidget {
+  const MyHomePage({Key? key}) : super(key: key);
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  _MyHomePageState createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  final _memoList = ['title', 'title2', 'title3'];
+class _MyHomePageState extends ConsumerState<MyHomePage> {
+  final _memoTitleList = ['title', 'title2', 'title3'];
+  late String _memo;
   var _titleController = TextEditingController();
+
+  // DatabaseHelper クラスのインスタンス取得
+  final dbHelper = DatabaseHelper.instance;
 
   Future<void> InputDialog(BuildContext context) async {
     return showDialog(
@@ -51,7 +61,7 @@ class _MyHomePageState extends State<MyHomePage> {
               TextButton(
                 onPressed: () {
                   setState(() {
-                    _memoList.add(_titleController.text);
+                    _memoTitleList.add(_titleController.text);
                   });
                   Navigator.pop(context);
                 },
@@ -67,14 +77,19 @@ class _MyHomePageState extends State<MyHomePage> {
       children: <Widget>[
         ListTile(
             title: Text(title),
-            onTap: () {
-              Navigator.of(context).push(
+            subtitle: Text(""),
+            onTap: () async {
+              Data data = Data(title: title, memo: "");
+              var memo = await Navigator.of(context).push(
                 MaterialPageRoute(
                   builder: (context) {
-                    return MemoPage(title: title);
+                    return MemoPage(data: data);
                   },
                 ),
               );
+              setState(() {
+                data.memo = memo;
+              });
             }),
         const Divider(),
       ],
@@ -89,9 +104,9 @@ class _MyHomePageState extends State<MyHomePage> {
         title: Text("Home"),
       ),
       body: ListView.builder(
-          itemCount: _memoList.length,
+          itemCount: _memoTitleList.length,
           itemBuilder: (context, index) {
-            return _listTile(_memoList[index]);
+            return _listTile(_memoTitleList[index]);
           }),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
@@ -101,5 +116,40 @@ class _MyHomePageState extends State<MyHomePage> {
         child: const Icon(Icons.add),
       ),
     );
+  }
+
+  void _insert() async {
+    Map<String, dynamic> row = {
+      DatabaseHelper.columnName: '山田　太郎',
+      DatabaseHelper.columnAge: 35,
+      DatabaseHelper.columnHoge: 1
+    };
+    final id = await dbHelper.insert(row);
+    print('登録しました。id: $id');
+  }
+
+  // 照会ボタンクリック
+  void _query() async {
+    final allRows = await dbHelper.queryAllRows();
+    print('全てのデータを照会しました。');
+    allRows.forEach(print);
+  }
+
+  // 更新ボタンクリック
+  void _update() async {
+    Map<String, dynamic> row = {
+      DatabaseHelper.columnId: 1,
+      DatabaseHelper.columnName: '鈴木　一郎',
+      DatabaseHelper.columnAge: 48
+    };
+    final rowsAffected = await dbHelper.update(row);
+    print('更新しました。 ID：$rowsAffected ');
+  }
+
+  // 削除ボタンクリック
+  void _delete() async {
+    final id = await dbHelper.queryRowCount();
+    final rowsDeleted = await dbHelper.delete(id!);
+    print('削除しました。 $rowsDeleted ID: $id');
   }
 }
